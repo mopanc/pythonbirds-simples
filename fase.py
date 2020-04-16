@@ -8,7 +8,7 @@ DERROTA = 'DERROTA'
 EM_ANDAMENTO = 'EM_ANDAMENTO'
 
 
-class Ponto():
+class Ponto:
     def __init__(self, x, y, caracter):
         self.caracter = caracter
         self.x = round(x)
@@ -24,7 +24,7 @@ class Ponto():
         return "Ponto(%s,%s,'%s')" % (self.x, self.y, self.caracter)
 
 
-class Fase():
+class Fase:
     def __init__(self, intervalo_de_colisao=1):
         """
         Método que inicializa uma fase.
@@ -43,7 +43,7 @@ class Fase():
 
         :param obstaculos:
         """
-        pass
+        self._obstaculos.extend(obstaculos)
 
     def adicionar_porco(self, *porcos):
         """
@@ -51,7 +51,7 @@ class Fase():
 
         :param porcos:
         """
-        pass
+        self._porcos.extend(porcos)
 
     def adicionar_passaro(self, *passaros):
         """
@@ -59,7 +59,7 @@ class Fase():
 
         :param passaros:
         """
-        pass
+        self._passaros.extend(passaros)
 
     def status(self):
         """
@@ -86,7 +86,12 @@ class Fase():
         :param angulo: ângulo de lançamento
         :param tempo: Tempo de lançamento
         """
-        pass
+
+        for passaro in self._passaros:
+            if not passaro.foi_lancado():
+                passaro.lancar(angulo, tempo)
+                break
+
 
 
     def calcular_pontos(self, tempo):
@@ -98,6 +103,11 @@ class Fase():
         :param tempo: tempo para o qual devem ser calculados os pontos
         :return: objeto do tipo Ponto
         """
+        for passaro in self._passaros:
+            passaro.calcular_posicao(tempo)
+            for obstaculo_ou_porco in self._obstaculos + self._porcos:
+                passaro.colidir(obstaculo_ou_porco, self.intervalo_de_colisao)
+
         pontos=[self._transformar_em_ponto(a) for a in self._passaros+self._obstaculos+self._porcos]
 
         return pontos
