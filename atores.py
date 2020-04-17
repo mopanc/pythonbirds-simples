@@ -38,7 +38,7 @@ class Ator:
         :param tempo: o tempo do jogo
         :return: posição x, y do ator
         """
-        return 1, 1
+        return self.x, self.y
 
     def esta_dentro_do_intervalo(self, posicao_1, posicao_2, intervalo):
         distancia = abs(posicao_1 - posicao_2)
@@ -72,6 +72,7 @@ class Obstaculo(Ator):
 
 class Porco(Ator):
     _caracter_ativo = '@'
+    _caracter_destruido = '+'
 
 
 class DuploLancamentoExcecao(Exception):
@@ -111,12 +112,19 @@ class Passaro(Ator):
         o status dos Passaro deve ser alterado para destruido, bem como o seu caracter
 
         """
-        pass
+        if self.y <= 0:
+            self.status = DESTRUIDO
 
     def calcular_posicao_horizontal(self, delta_t):
         x = self._x_inicial
         x += self.velocidade_escalar * delta_t *math.cos(self._angulo_de_lancamento)
         return x
+
+    def calcular_posicao_vertical(self, delta_t):
+        y = self._y_inicial
+        y += self.velocidade_escalar * delta_t *math.sin(self._angulo_de_lancamento)
+        y -= GRAVIDADE * (delta_t ** 2)/2
+        return y
 
     def calcular_posicao(self, tempo):
         """
@@ -135,6 +143,7 @@ class Passaro(Ator):
         if self.foi_lancado() and self.status == ATIVO:
             delta_t = tempo - self._tempo_de_lancamento
             self.x = self.calcular_posicao_horizontal(delta_t)
+            self.y = self.calcular_posicao_vertical(delta_t)
         return self.x, self.y
 
 
@@ -154,8 +163,11 @@ class Passaro(Ator):
 
 
 class PassaroAmarelo(Passaro):
-    pass
+    velocidade_escalar = 30
+    _caracter_destruido = 'a'
 
 
 class PassaroVermelho(Passaro):
     _caracter_ativo = 'V'
+    _caracter_destruido = 'v'
+    velocidade_escalar = 20
